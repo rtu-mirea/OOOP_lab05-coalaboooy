@@ -1,9 +1,6 @@
 package Lab3;
 
 import javax.swing.*;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.*;
 
 class TradeSystem {
@@ -64,17 +61,8 @@ class TradeSystem {
         approvedRequests.forEach(R -> R.getRequester().takeRequest(R));
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         JFrame.setDefaultLookAndFeelDecorated(true);
-        ObjectInputStream in = null;
-        try {
-            in = new ObjectInputStream(new FileInputStream("Users.bin"));
-            while (true)
-                users.add((User) in.readObject());
-        } catch (IOException | ClassNotFoundException e) {
-            if (in != null)
-                in.close();
-        }
         new TradeSystem();
         new InitialWindow();
     }

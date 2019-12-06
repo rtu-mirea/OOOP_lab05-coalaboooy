@@ -2,14 +2,15 @@ package Lab3;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import javax.swing.*;
+
+import static Lab3.TradeSystem.users;
 
 class AdminWindow extends JFrame{
 
     private JButton addButton = new JButton("Добавить участника");
+    private JButton modButton = new JButton("Изменить инфорацию участников");
     private JButton resButton = new JButton("Выслать результаты участникам");
     private GridBagLayout gbl = new GridBagLayout();
 
@@ -28,29 +29,29 @@ class AdminWindow extends JFrame{
         container.setLayout(gbl);
 
         GridBagConstraints lookCon = new GridBagConstraints();
-        GridBagConstraints addCon = new GridBagConstraints();
 
         lookCon.gridx = 0;
         lookCon.gridy = GridBagConstraints.RELATIVE;
         lookCon.fill = GridBagConstraints.BOTH;
-        lookCon.insets = new Insets(10, 0, 10, 0);
-        addCon.gridx = 0;
-        addCon.gridy = GridBagConstraints.RELATIVE;
-        addCon.fill = GridBagConstraints.BOTH;
-        addCon.insets = new Insets(10, 0, 0, 0);
+        lookCon.insets = new Insets(10, 0, 0, 0);
 
         addButton.setFont(new Font("Times New Roman", Font.PLAIN, 14));
         addButton.setHorizontalAlignment(JTextField.CENTER);
         resButton.setFont(new Font("Times New Roman", Font.PLAIN, 14));
         resButton.setHorizontalAlignment(JTextField.CENTER);
+        modButton.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+        modButton.setHorizontalAlignment(JTextField.CENTER);
 
         resButton.addActionListener(new ResultEventListener());
         addButton.addActionListener(new AddUserEventListener());
+        modButton.addActionListener(new ModifyEventListener());
+        gbl.setConstraints(modButton, lookCon);
         gbl.setConstraints(resButton, lookCon);
-        gbl.setConstraints(addButton, addCon);
+        gbl.setConstraints(addButton, lookCon);
 
         container.add(resButton);
         container.add(addButton);
+        container.add(modButton);
         this.setVisible(true);
     }
 
@@ -121,7 +122,7 @@ class AdminWindow extends JFrame{
                 ObjectOutputStream out;
                 try {
                     out = new ObjectOutputStream(new FileOutputStream("Users.bin"));
-                    for (User user1 : TradeSystem.users)
+                    for (User user1 : users)
                         out.writeObject(user1);
                     out.close();
                 } catch (IOException ex) {
@@ -131,6 +132,13 @@ class AdminWindow extends JFrame{
             else
                 JOptionPane.showMessageDialog(null, "Такой пользователь уже зарегестрирован!",
                         "Ошибка", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static class ModifyEventListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent e) {
+            
         }
     }
 

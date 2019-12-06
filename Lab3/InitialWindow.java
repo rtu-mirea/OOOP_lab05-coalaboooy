@@ -2,10 +2,17 @@ package Lab3;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import static Lab3.TradeSystem.users;
 
 class InitialWindow extends JFrame {
 
+    private static boolean firstEnter = true;
     private JButton submitButton = new JButton("Вход");
     private JTextField loginInput = new JTextField();
     private JPasswordField passwordInput = new JPasswordField();
@@ -90,6 +97,30 @@ class InitialWindow extends JFrame {
 
             if (loginInput.getText().equals(A.getLogin()) && passwordInput.getText().equals(A.getPassword())) {
                 dispose();
+                if (firstEnter) {
+                    JFileChooser fc = new JFileChooser("C:\\Users\\Александр\\Desktop\\Учеба\\ООП\\Sem1\\LAB_№5");
+                    FileNameExtensionFilter filter = new FileNameExtensionFilter("Binary files","bin");
+                    fc.setDialogTitle("Выбор файла для загрузки и сохранения информации пользователей");
+                    fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                    fc.setFileFilter(filter);
+                    int result = fc.showOpenDialog(InitialWindow.this);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        ObjectInputStream in = null;
+                        try {
+                            in = new ObjectInputStream(new FileInputStream(fc.getSelectedFile()));
+                            while (true)
+                                users.add((User) in.readObject());
+                        } catch (IOException | ClassNotFoundException es) {
+                            try {
+                                if (in != null)
+                                    in.close();
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                    firstEnter = false;
+                }
                 new AdminWindow();
             }
             else {
