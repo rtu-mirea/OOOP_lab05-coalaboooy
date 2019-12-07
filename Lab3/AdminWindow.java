@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
+import javax.swing.table.*;
 
 import static Lab3.TradeSystem.users;
 
@@ -53,6 +54,27 @@ class AdminWindow extends JFrame{
         container.add(addButton);
         container.add(modButton);
         this.setVisible(true);
+    }
+
+    private static class TableInfoWindow extends JFrame {
+
+        private static JTable table = new JTable(new InfoTableModel());
+
+        TableInfoWindow() {
+            this.setTitle("Информация о пользователях");
+            this.setSize(350, 200);
+            this.setResizable(false);
+            this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize(), fSize = getSize();
+            if (fSize.height > sSize.height) { fSize.height = sSize.height; }
+            if (fSize.width > sSize.width) { fSize.width = sSize.width; }
+            setLocation((sSize.width - fSize.width) / 2, (sSize.height - fSize.height) / 3);
+
+            Container container = this.getContentPane();
+            container.add(table);
+
+            this.setVisible(true);
+        }
     }
 
     private static class AddUserWindow extends JFrame {
@@ -113,6 +135,56 @@ class AdminWindow extends JFrame{
         }
     }
 
+
+    private static class InfoTableModel extends AbstractTableModel {
+
+        @Override
+        public int getRowCount() {
+            return users.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 3;
+        }
+
+//        @Override
+//        public String getColumnName(int columnIndex) {
+//            String result = "";
+//            switch (columnIndex) {
+//                case 0:
+//                    result = "Имя";
+//                    break;
+//                case 1:
+//                    result = "Логин";
+//                    break;
+//                case 2:
+//                    result = "Пароль";
+//                    break;
+//            }
+//            return result;
+//        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            switch (columnIndex) {
+                case 0:
+                    return users.get(rowIndex).name;
+                case 1:
+                    return users.get(rowIndex).login;
+                case 2:
+                    return users.get(rowIndex).password;
+                default:
+                    return "";
+            }
+        }
+
+        @Override
+        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            //TODO: Изменение текста в ячейках и users, перезапись Users.bin
+        }
+    }
+
     private static class AddUserButtonListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
@@ -138,7 +210,7 @@ class AdminWindow extends JFrame{
     private static class ModifyEventListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
-            
+            new TableInfoWindow();
         }
     }
 
