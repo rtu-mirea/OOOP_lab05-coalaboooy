@@ -54,7 +54,7 @@ class ClientWindow extends JFrame{
         gbl.setConstraints(welcome, welCon);
 
         lookButton.addActionListener(new LookRequestButtonListener());
-        addButton.addActionListener(new AddRequestButtonListener());
+        addButton.addActionListener(e -> new AddRequestWindow());
 
         container.add(welcome);
         container.add(lookButton);
@@ -135,13 +135,6 @@ class ClientWindow extends JFrame{
             else
                 msg = TradeSystem.currentUser.getMsg();
             JOptionPane.showMessageDialog(null, msg, "", JOptionPane.PLAIN_MESSAGE);
-        }
-    }
-
-    private static class AddRequestButtonListener implements ActionListener {
-
-        public void actionPerformed(ActionEvent e) {
-            new AddRequestWindow();
         }
     }
 

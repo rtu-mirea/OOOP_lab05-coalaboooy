@@ -3,6 +3,7 @@ package Lab3;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.Arrays;
 import javax.swing.*;
 import javax.swing.table.*;
 
@@ -11,11 +12,14 @@ import static Lab3.TradeSystem.users;
 class AdminWindow extends JFrame{
 
     private JButton addButton = new JButton("Добавить участника");
-    private JButton modButton = new JButton("Изменить инфорацию участников");
+    private JButton lookButton = new JButton("Просмотреть инфорацию участников");
+    private JButton modButton = new JButton("Изменить информацию участников");
     private JButton resButton = new JButton("Выслать результаты участникам");
     private GridBagLayout gbl = new GridBagLayout();
+    private GridBagConstraints lookCon = new GridBagConstraints();
 
     AdminWindow () {
+
         this.setTitle("Администратор");
         this.setSize(300, 200);
         this.setResizable(false);
@@ -29,8 +33,6 @@ class AdminWindow extends JFrame{
         Container container = this.getContentPane();
         container.setLayout(gbl);
 
-        GridBagConstraints lookCon = new GridBagConstraints();
-
         lookCon.gridx = 0;
         lookCon.gridy = GridBagConstraints.RELATIVE;
         lookCon.fill = GridBagConstraints.BOTH;
@@ -40,25 +42,30 @@ class AdminWindow extends JFrame{
         addButton.setHorizontalAlignment(JTextField.CENTER);
         resButton.setFont(new Font("Times New Roman", Font.PLAIN, 14));
         resButton.setHorizontalAlignment(JTextField.CENTER);
+        lookButton.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+        lookButton.setHorizontalAlignment(JTextField.CENTER);
         modButton.setFont(new Font("Times New Roman", Font.PLAIN, 14));
         modButton.setHorizontalAlignment(JTextField.CENTER);
 
         resButton.addActionListener(new ResultEventListener());
-        addButton.addActionListener(new AddUserEventListener());
-        modButton.addActionListener(new ModifyEventListener());
-        gbl.setConstraints(modButton, lookCon);
+        addButton.addActionListener(e -> new AddUserWindow());
+        lookButton.addActionListener(e -> new TableInfoWindow());
+        modButton.addActionListener(e -> new ModUserWindow());
+        gbl.setConstraints(lookButton, lookCon);
         gbl.setConstraints(resButton, lookCon);
         gbl.setConstraints(addButton, lookCon);
+        gbl.setConstraints(modButton, lookCon);
 
         container.add(resButton);
         container.add(addButton);
+        container.add(lookButton);
         container.add(modButton);
         this.setVisible(true);
     }
 
     private static class TableInfoWindow extends JFrame {
 
-        private static JTable table = new JTable(new InfoTableModel());
+        private JTable table = new JTable(new InfoTableModel());
 
         TableInfoWindow() {
             this.setTitle("Информация о пользователях");
@@ -71,6 +78,7 @@ class AdminWindow extends JFrame{
             setLocation((sSize.width - fSize.width) / 2, (sSize.height - fSize.height) / 3);
 
             Container container = this.getContentPane();
+
             container.add(table);
 
             this.setVisible(true);
@@ -79,11 +87,11 @@ class AdminWindow extends JFrame{
 
     private static class AddUserWindow extends JFrame {
 
-        private GridBagLayout gbl = new GridBagLayout();
+        GridBagLayout gbl = new GridBagLayout();
         static JTextField loginInput = new JTextField("Логин");
         static JTextField passwordInput = new JTextField("Пароль");
         static JTextField nameInput = new JTextField("Имя");
-        private JButton addButton = new JButton("Зарегестрировать пользователя");
+        protected JButton addButton = new JButton("Зарегестрировать пользователя");
         private GridBagConstraints firstInput = new GridBagConstraints();
         private GridBagConstraints otherInput = new GridBagConstraints();
         private GridBagConstraints button = new GridBagConstraints();
@@ -96,6 +104,7 @@ class AdminWindow extends JFrame{
             if (fSize.width  > sSize.width)  {fSize.width = sSize.width;}
             setLocation ((sSize.width - fSize.width)/3, (sSize.height - fSize.height)/3);
             this.addWindowListener(new UserCloseEventListener());
+            this.setResizable(false);
 
             Container container = this.getContentPane();
             container.setLayout(gbl);
@@ -135,6 +144,44 @@ class AdminWindow extends JFrame{
         }
     }
 
+    private static class ModUserWindow extends AddUserWindow {
+
+        String[] userLogins = new String[users.size()];
+        private JPanel leftPane = new JPanel();
+        private JPanel rightPane = new JPanel();
+
+        ModUserWindow() {
+            convertUsersToString();
+
+            this.setTitle("Изменение информации о пользователях");
+            this.setSize(390, 200);
+
+            JComboBox<String> userList = new JComboBox<>(userLogins);
+            //userList.addItemListener();
+            Container container = this.getContentPane();
+            container.setLayout(new FlowLayout(FlowLayout.CENTER));
+            leftPane.setLayout(new FlowLayout(FlowLayout.CENTER));
+            rightPane.setLayout(gbl);
+
+            addButton.setText("Завершить изменения");
+            addButton.addActionListener(new ModifyEventListener());
+            leftPane.add(new JLabel("Выберите пользователя"));
+            leftPane.add(userList);
+            rightPane.add(nameInput);
+            rightPane.add(loginInput);
+            rightPane.add(passwordInput);
+            rightPane.add(addButton);
+
+            container.add(leftPane);
+            container.add(rightPane);
+        }
+
+        void convertUsersToString () {
+            for (int i = 0; i < users.size(); i++) {
+                userLogins[i] = users.get(i).name;
+            }
+        }
+    }
 
     private static class InfoTableModel extends AbstractTableModel {
 
@@ -148,23 +195,6 @@ class AdminWindow extends JFrame{
             return 3;
         }
 
-//        @Override
-//        public String getColumnName(int columnIndex) {
-//            String result = "";
-//            switch (columnIndex) {
-//                case 0:
-//                    result = "Имя";
-//                    break;
-//                case 1:
-//                    result = "Логин";
-//                    break;
-//                case 2:
-//                    result = "Пароль";
-//                    break;
-//            }
-//            return result;
-//        }
-
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             switch (columnIndex) {
@@ -177,11 +207,6 @@ class AdminWindow extends JFrame{
                 default:
                     return "";
             }
-        }
-
-        @Override
-        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            //TODO: Изменение текста в ячейках и users, перезапись Users.bin
         }
     }
 
@@ -209,8 +234,25 @@ class AdminWindow extends JFrame{
 
     private static class ModifyEventListener implements ActionListener {
 
+        @Override
         public void actionPerformed(ActionEvent e) {
-            new TableInfoWindow();
+//            ObjectOutputStream out;
+//            try {
+//                out = new ObjectOutputStream(new FileOutputStream("Users.bin"));
+//                for (User user1 : users)
+//                    out.writeObject(user1);
+//                out.close();
+//            } catch (IOException ex) {
+//                System.err.println(ex.getMessage());
+//            }
+        }
+    }
+
+    private static class ItemChangedListener implements ItemListener {
+
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            //TODO: В случае смены пользователя изменить значения текстовых полей
         }
     }
 
@@ -220,13 +262,6 @@ class AdminWindow extends JFrame{
             TradeSystem.processRequests();
             JOptionPane.showMessageDialog(null, "Информация по заявкам рассчитана и выслана пользователям",
                     "", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    private static class AddUserEventListener implements ActionListener {
-
-        public void actionPerformed(ActionEvent e) {
-            new AddUserWindow();
         }
     }
 
