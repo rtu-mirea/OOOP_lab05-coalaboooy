@@ -3,13 +3,12 @@ package Lab3;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.util.Arrays;
 import javax.swing.*;
 import javax.swing.table.*;
 
 import static Lab3.TradeSystem.users;
 
-class AdminWindow extends JFrame{
+class AdminWindow extends JFrame {
 
     private JButton addButton = new JButton("Добавить участника");
     private JButton lookButton = new JButton("Просмотреть инфорацию участников");
@@ -49,8 +48,20 @@ class AdminWindow extends JFrame{
 
         resButton.addActionListener(new ResultEventListener());
         addButton.addActionListener(e -> new AddUserWindow());
-        lookButton.addActionListener(e -> new TableInfoWindow());
-        modButton.addActionListener(e -> new ModUserWindow());
+        lookButton.addActionListener(e -> {
+            if (users.size() == 0)
+                JOptionPane.showMessageDialog(null, "Список пользователей пуст!",
+                        "Ошибка", JOptionPane.WARNING_MESSAGE);
+            else
+                new TableInfoWindow();
+        });
+        modButton.addActionListener(e -> {
+            if (users.size() == 0)
+                JOptionPane.showMessageDialog(null, "Список пользователей пуст!",
+                        "Ошибка", JOptionPane.WARNING_MESSAGE);
+            else
+                new ModUserWindow();
+        });
         gbl.setConstraints(lookButton, lookCon);
         gbl.setConstraints(resButton, lookCon);
         gbl.setConstraints(addButton, lookCon);
@@ -70,7 +81,7 @@ class AdminWindow extends JFrame{
         TableInfoWindow() {
             this.setTitle("Информация о пользователях");
             this.setSize(350, 200);
-            this.setResizable(false);
+            this.setResizable(true);
             this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize(), fSize = getSize();
             if (fSize.height > sSize.height) { fSize.height = sSize.height; }
@@ -85,16 +96,15 @@ class AdminWindow extends JFrame{
         }
     }
 
-    private static class AddUserWindow extends JFrame {
-
+    private static  class AddUserWindow extends JFrame {
         GridBagLayout gbl = new GridBagLayout();
         static JTextField loginInput = new JTextField("Логин");
         static JTextField passwordInput = new JTextField("Пароль");
         static JTextField nameInput = new JTextField("Имя");
-        protected JButton addButton = new JButton("Зарегестрировать пользователя");
-        private GridBagConstraints firstInput = new GridBagConstraints();
-        private GridBagConstraints otherInput = new GridBagConstraints();
-        private GridBagConstraints button = new GridBagConstraints();
+        JButton addButton = new JButton("Зарегестрировать пользователя");
+        static GridBagConstraints firstInput = new GridBagConstraints();
+        static GridBagConstraints otherInput = new GridBagConstraints();
+        static GridBagConstraints button = new GridBagConstraints();
 
         AddUserWindow() {
             this.setTitle("Добавление пользвателя в систему");
@@ -144,41 +154,87 @@ class AdminWindow extends JFrame{
         }
     }
 
-    private static class ModUserWindow extends AddUserWindow {
+    private static class ModUserWindow extends JFrame {
 
-        String[] userLogins = new String[users.size()];
+        String[] userNames = new String[users.size()];
+        static JComboBox<String> userList;
         private JPanel leftPane = new JPanel();
         private JPanel rightPane = new JPanel();
+        GridBagLayout gbl = new GridBagLayout();
+        static JTextField loginInput = new JTextField();
+        static JTextField passwordInput = new JTextField();
+        static JTextField nameInput = new JTextField();
+        static GridBagConstraints firstInput = new GridBagConstraints();
+        static GridBagConstraints otherInput = new GridBagConstraints();
+        static GridBagConstraints button = new GridBagConstraints();
+        static JButton endButton = new JButton("Завершить изменения");
+        ActionListener mod = new ModifyEventListener();
 
         ModUserWindow() {
             convertUsersToString();
 
             this.setTitle("Изменение информации о пользователях");
-            this.setSize(390, 200);
+            this.setSize(390, 250);
+            Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize(), fSize = getSize ();
+            if (fSize.height > sSize.height) {fSize.height = sSize.height;}
+            if (fSize.width  > sSize.width)  {fSize.width = sSize.width;}
+            setLocation ((sSize.width - fSize.width)/3, (sSize.height - fSize.height)/3);
+            this.setResizable(false);
 
-            JComboBox<String> userList = new JComboBox<>(userLogins);
-            //userList.addItemListener();
             Container container = this.getContentPane();
             container.setLayout(new FlowLayout(FlowLayout.CENTER));
             leftPane.setLayout(new FlowLayout(FlowLayout.CENTER));
             rightPane.setLayout(gbl);
 
-            addButton.setText("Завершить изменения");
-            addButton.addActionListener(new ModifyEventListener());
+            firstInput.gridx = 0;
+            firstInput.gridy = 0;
+            firstInput.fill = GridBagConstraints.BOTH;
+            firstInput.insets = new Insets(0, 0, 10, 0);
+            otherInput.gridx = 0;
+            otherInput.gridy = GridBagConstraints.RELATIVE;
+            otherInput.fill = GridBagConstraints.BOTH;
+            otherInput.insets = new Insets(10, 0, 10, 0);
+            button.gridx = 0;
+            button.gridy = GridBagConstraints.RELATIVE;
+            button.insets = new Insets(10, 10, 10, 10);
+
+            loginInput.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+            loginInput.setHorizontalAlignment(JTextField.LEFT);
+            passwordInput.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+            passwordInput.setHorizontalAlignment(JTextField.LEFT);
+            nameInput.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+            nameInput.setHorizontalAlignment(JTextField.LEFT);
+            endButton.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+            endButton.setHorizontalAlignment(JTextField.CENTER);
+
+            gbl.setConstraints(nameInput, firstInput);
+            gbl.setConstraints(loginInput, otherInput);
+            gbl.setConstraints(passwordInput, otherInput);
+            gbl.setConstraints(endButton, button);
+
+            userList = new JComboBox<>(userNames);
+            userList.addItemListener(new ItemChangedListener());
+
+            nameInput.setText(users.get(0).name);
+            loginInput.setText(users.get(0).login);
+            passwordInput.setText(users.get(0).password);
+            endButton.addActionListener(mod);
+
             leftPane.add(new JLabel("Выберите пользователя"));
             leftPane.add(userList);
             rightPane.add(nameInput);
             rightPane.add(loginInput);
             rightPane.add(passwordInput);
-            rightPane.add(addButton);
+            rightPane.add(endButton);
 
             container.add(leftPane);
             container.add(rightPane);
+            this.setVisible(true);
         }
 
         void convertUsersToString () {
             for (int i = 0; i < users.size(); i++) {
-                userLogins[i] = users.get(i).name;
+                userNames[i] = users.get(i).name;
             }
         }
     }
@@ -212,10 +268,10 @@ class AdminWindow extends JFrame{
 
     private static class AddUserButtonListener implements ActionListener {
 
+        @Override
         public void actionPerformed(ActionEvent e) {
-            String login = AddUserWindow.loginInput.getText();
-            if (TradeSystem.findUser(login) == null) {
-                TradeSystem.addUser(AddUserWindow.nameInput.getText(), login, AddUserWindow.passwordInput.getText());
+            if (TradeSystem.findUser(AddUserWindow.loginInput.getText()) == null) {
+                TradeSystem.addUser(AddUserWindow.nameInput.getText(), AddUserWindow.loginInput.getText(), AddUserWindow.passwordInput.getText());
                 ObjectOutputStream out;
                 try {
                     out = new ObjectOutputStream(new FileOutputStream("Users.bin"));
@@ -227,7 +283,7 @@ class AdminWindow extends JFrame{
                 }
             }
             else
-                JOptionPane.showMessageDialog(null, "Такой пользователь уже зарегестрирован!",
+                JOptionPane.showMessageDialog(null, "Такой пользователь уже зарегистрирован!",
                         "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -236,15 +292,18 @@ class AdminWindow extends JFrame{
 
         @Override
         public void actionPerformed(ActionEvent e) {
-//            ObjectOutputStream out;
-//            try {
-//                out = new ObjectOutputStream(new FileOutputStream("Users.bin"));
-//                for (User user1 : users)
-//                    out.writeObject(user1);
-//                out.close();
-//            } catch (IOException ex) {
-//                System.err.println(ex.getMessage());
-//            }
+            users.get(ModUserWindow.userList.getSelectedIndex()).name = ModUserWindow.nameInput.getText();
+            users.get(ModUserWindow.userList.getSelectedIndex()).login = ModUserWindow.loginInput.getText();
+            users.get(ModUserWindow.userList.getSelectedIndex()).password = ModUserWindow.passwordInput.getText();
+            ObjectOutputStream out;
+            try {
+                out = new ObjectOutputStream(new FileOutputStream("Users.bin"));
+                for (User user1 : users)
+                    out.writeObject(user1);
+                out.close();
+            } catch (IOException ex) {
+                System.err.println(ex.getMessage());
+            }
         }
     }
 
@@ -252,7 +311,9 @@ class AdminWindow extends JFrame{
 
         @Override
         public void itemStateChanged(ItemEvent e) {
-            //TODO: В случае смены пользователя изменить значения текстовых полей
+            ModUserWindow.nameInput.setText(users.get(ModUserWindow.userList.getSelectedIndex()).name);
+            ModUserWindow.loginInput.setText(users.get(ModUserWindow.userList.getSelectedIndex()).login);
+            ModUserWindow.passwordInput.setText(users.get(ModUserWindow.userList.getSelectedIndex()).password);
         }
     }
 
