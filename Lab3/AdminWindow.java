@@ -17,7 +17,7 @@ class AdminWindow extends JFrame {
     private GridBagLayout gbl = new GridBagLayout();
     private GridBagConstraints lookCon = new GridBagConstraints();
 
-    AdminWindow () {
+    AdminWindow (File selectedFile) {
 
         this.setTitle("Администратор");
         this.setSize(300, 200);
@@ -47,7 +47,7 @@ class AdminWindow extends JFrame {
         modButton.setHorizontalAlignment(JTextField.CENTER);
 
         resButton.addActionListener(new ResultEventListener());
-        addButton.addActionListener(e -> new AddUserWindow());
+        addButton.addActionListener(e -> new AddUserWindow(selectedFile));
         lookButton.addActionListener(e -> {
             if (users.size() == 0)
                 JOptionPane.showMessageDialog(null, "Список пользователей пуст!",
@@ -60,7 +60,7 @@ class AdminWindow extends JFrame {
                 JOptionPane.showMessageDialog(null, "Список пользователей пуст!",
                         "Ошибка", JOptionPane.WARNING_MESSAGE);
             else
-                new ModUserWindow();
+                new ModUserWindow(selectedFile);
         });
         gbl.setConstraints(lookButton, lookCon);
         gbl.setConstraints(resButton, lookCon);
@@ -96,7 +96,7 @@ class AdminWindow extends JFrame {
         }
     }
 
-    private static  class AddUserWindow extends JFrame {
+    private static class AddUserWindow extends JFrame {
         GridBagLayout gbl = new GridBagLayout();
         static JTextField loginInput = new JTextField("Логин");
         static JTextField passwordInput = new JTextField("Пароль");
@@ -105,8 +105,10 @@ class AdminWindow extends JFrame {
         static GridBagConstraints firstInput = new GridBagConstraints();
         static GridBagConstraints otherInput = new GridBagConstraints();
         static GridBagConstraints button = new GridBagConstraints();
+        static File file;
 
-        AddUserWindow() {
+        AddUserWindow(File selectedFile) {
+            file = selectedFile;
             this.setTitle("Добавление пользвателя в систему");
             this.setSize(400, 200);
             Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize(), fSize = getSize ();
@@ -169,8 +171,10 @@ class AdminWindow extends JFrame {
         static GridBagConstraints button = new GridBagConstraints();
         static JButton endButton = new JButton("Завершить изменения");
         ActionListener mod = new ModifyEventListener();
+        static File file;
 
-        ModUserWindow() {
+        ModUserWindow(File selectedFile) {
+            file = selectedFile;
             convertUsersToString();
 
             this.setTitle("Изменение информации о пользователях");
@@ -274,7 +278,7 @@ class AdminWindow extends JFrame {
                 TradeSystem.addUser(AddUserWindow.nameInput.getText(), AddUserWindow.loginInput.getText(), AddUserWindow.passwordInput.getText());
                 ObjectOutputStream out;
                 try {
-                    out = new ObjectOutputStream(new FileOutputStream("Users.bin"));
+                    out = new ObjectOutputStream(new FileOutputStream(AddUserWindow.file));
                     for (User user1 : users)
                         out.writeObject(user1);
                     out.close();
@@ -297,7 +301,7 @@ class AdminWindow extends JFrame {
             users.get(ModUserWindow.userList.getSelectedIndex()).password = ModUserWindow.passwordInput.getText();
             ObjectOutputStream out;
             try {
-                out = new ObjectOutputStream(new FileOutputStream("Users.bin"));
+                out = new ObjectOutputStream(new FileOutputStream(ModUserWindow.file));
                 for (User user1 : users)
                     out.writeObject(user1);
                 out.close();

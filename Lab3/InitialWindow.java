@@ -2,6 +2,7 @@ package Lab3;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -12,6 +13,7 @@ import static Lab3.TradeSystem.users;
 
 class InitialWindow extends JFrame {
 
+    public File selectedFile;
     private static boolean firstEnter = true;
     private JButton submitButton = new JButton("Вход");
     private JTextField loginInput = new JTextField();
@@ -105,9 +107,10 @@ class InitialWindow extends JFrame {
                     fc.setFileFilter(filter);
                     int result = fc.showOpenDialog(InitialWindow.this);
                     if (result == JFileChooser.APPROVE_OPTION) {
+                        selectedFile = fc.getSelectedFile();
                         ObjectInputStream in = null;
                         try {
-                            in = new ObjectInputStream(new FileInputStream(fc.getSelectedFile()));
+                            in = new ObjectInputStream(new FileInputStream(selectedFile));
                             while (true)
                                 users.add((User) in.readObject());
                         } catch (IOException | ClassNotFoundException es) {
@@ -121,7 +124,7 @@ class InitialWindow extends JFrame {
                     }
                     firstEnter = false;
                 }
-                new AdminWindow();
+                new AdminWindow(selectedFile);
             }
             else {
                 User current = TradeSystem.findUser(loginInput.getText());
